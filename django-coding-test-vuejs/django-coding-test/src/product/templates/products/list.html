@@ -12,7 +12,7 @@
 
 
 <div class="card">
-    <form action="" method="get" class="card-header">
+    <form action="" method="GET" class="card-header">
         <div class="form-row justify-content-between">
             <div class="col-md-2">
                 <input type="text" name="title" placeholder="Product Title" class="form-control">
@@ -20,6 +20,13 @@
             <div class="col-md-2">
                 <select name="variant" id="" class="form-control">
                     <option selected disabled>--Select A Variant--</option>
+                    {% for variant in variants %}
+                        <optgroup label="{{ variant.title }}">
+                            {% for p_variant in variant.productvariant_set.all %}
+                                <option value="{{ p_variant.id }}">{{ p_variant }}</option>
+                            {% endfor %}
+                        </optgroup>
+                    {% endfor %}
 
                 </select>
             </div>

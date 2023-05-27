@@ -21,8 +21,27 @@ class ProductListView(ListView):
     template_name = 'products/list.html'
     paginate_by = 2
 
-    def get_context_data(self, **kwargs):
+    def get_queryset(self, *args, **kwargs):
+        if self.request.GET:
+            product_name = self.request.GET.get('title', None)
+            product_variant = self.request.GET.get('variant', None)
+            object_list = []
+
+            if product_name:
+                object_list = Product.objects.filter(title=product_name)
+                for obj in object_list:
+                    print(obj.productvariant_set.all())
+            elif product_variant:
+                object_list = Product.objects.filter(productvariant=product_variant)
+            return object_list
+        
+
+        else:
+            return super().get_queryset()
+
+    def get_context_data(self, **kwargs: Any):
         context = super().get_context_data(**kwargs)
-        # total_product = Product.objects.all().values('id', 'product_variant_one', 'product_variant_two', 'product_variant_three', 'price', 'stock', 'product')
-        # context["variants"] = list(variants)
+        variants = Variant.objects.filter(active=True)
+        context['variants'] = list(variants)
         return context
+    
