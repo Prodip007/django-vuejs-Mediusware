@@ -8,6 +8,9 @@ class Variant(TimeStampMixin):
     description = models.TextField()
     active = models.BooleanField(default=True)
 
+    def __str__(self):
+        return self.title
+
 
 class Product(TimeStampMixin):
     title = models.CharField(max_length=255)
@@ -24,6 +27,9 @@ class ProductVariant(TimeStampMixin):
     variant_title = models.CharField(max_length=255)
     variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.variant_title
 
 
 class ProductVariantPrice(TimeStampMixin):

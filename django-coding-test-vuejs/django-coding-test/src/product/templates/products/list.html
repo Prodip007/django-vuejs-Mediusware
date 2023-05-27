@@ -4,6 +4,8 @@
 
 {% block content %}
 
+<h1>This is changed</h1>
+
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <h1 class="h3 mb-0 text-gray-800">Products</h1>
 </div>
@@ -55,48 +57,24 @@
                 </thead>
 
                 <tbody>
+                    {% for item in object_list %}
                 <tr>
-                    <td>1</td>
-                    <td>T-Shirt <br> Created at : 25-Aug-2020</td>
-                    <td>Quality product in low cost</td>
+                    <td>{{ item.id }}</td>
+                    <td>{{ item.title }} <br> Created at : {{ item.created_at }}</td>
+                    <td>{{ item.description }}</td>
                     <td>
                         <dl class="row mb-0" style="height: 80px; overflow: hidden" id="variant">
-                                <dt class="col-sm-3 pb-0">
-                                    XL/ Black/ Full
-                                </dt>
-                                <dd class="col-sm-9">
-                                    <dl class="row mb-0">
-                                        <dd class="col-sm-4 pb-0">Price : 200.0</dd>
-                                        <dd class="col-sm-8 pb-0">InStock : 50.</dd>
-                                    </dl>
-                                </dd>
-                                <dt class="col-sm-3 pb-0">
-                                    XL/ Black/ Half
-                                </dt>
-                                <dd class="col-sm-9">
-                                    <dl class="row mb-0">
-                                        <dd class="col-sm-4 pb-0">Price : 200.0</dd>
-                                        <dd class="col-sm-8 pb-0">InStock : 50.</dd>
-                                    </dl>
-                                </dd>
-                                <dt class="col-sm-3 pb-0">
-                                    L/ Black/ Full
-                                </dt>
-                                <dd class="col-sm-9">
-                                    <dl class="row mb-0">
-                                        <dd class="col-sm-4 pb-0">Price : 200.0</dd>
-                                        <dd class="col-sm-8 pb-0">InStock : 50.</dd>
-                                    </dl>
-                                </dd>
-                                <dt class="col-sm-3 pb-0">
-                                    L/ Black/ Half
-                                </dt>
-                                <dd class="col-sm-9">
-                                    <dl class="row mb-0">
-                                        <dd class="col-sm-4 pb-0">Price : 200.0</dd>
-                                        <dd class="col-sm-8 pb-0">InStock : 50.</dd>
-                                    </dl>
-                                </dd>
+                            {% for v in item.productvariantprice_set.all %}
+                            <dt class="col-sm-3 pb-0">
+                                        {{ v.product_variant_one }} / {{ v.product_variant_two }} / {{ v.product_variant_three }}
+                                    </dt>
+                                    <dd class="col-sm-9">
+                                        <dl class="row mb-0">
+                                            <dd class="col-sm-4 pb-0">Price : {{ v.price }}</dd>
+                                            <dd class="col-sm-8 pb-0">InStock : {{ v.stock }}</dd>
+                                        </dl>
+                                    </dd>
+                                    {% endfor %}
                             </dl>
                         <button onclick="$('#variant').toggleClass('h-auto')" class="btn btn-sm btn-link">Show more
                         </button>
@@ -107,17 +85,17 @@
                         </div>
                     </td>
                 </tr>
+                {% endfor %}
                 </tbody>
 
             </table>
         </div>
-
     </div>
 
     <div class="card-footer">
         <div class="row justify-content-between">
             <div class="col-md-6">
-                <p>Showing 1 to 10 out of 100</p>
+                <p>Showing 1 to out of 100</p>
             </div>
             <div class="col-md-2">
 
