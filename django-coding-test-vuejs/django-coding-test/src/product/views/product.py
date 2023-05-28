@@ -1,6 +1,5 @@
 from django.views import generic
 from django.shortcuts import get_object_or_404, render
-from django.views.decorators.csrf import csrf_exempt
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -21,6 +20,13 @@ class CreateProductView(generic.CreateView):
         context['product'] = True
         context['variants'] = list(variants.all())
         return context
+
+class UpdateProductView(generic.UpdateView):
+    template_name = 'products/product_form.html'
+    model = Product
+    fields = '__all__'
+
+    success_url = '/'
 
 
 @api_view(['POST'])
