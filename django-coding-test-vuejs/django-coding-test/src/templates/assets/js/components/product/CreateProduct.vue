@@ -188,9 +188,15 @@ export default {
         product_variant: this.product_variant,
         product_variant_prices: this.product_variant_prices
       }
+      
+      const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-
-      axios.post('/product', product).then(response => {
+      
+      axios.post('/product/create-product/', product, {
+        headers: {
+          'X-CSRFToken': csrfToken
+        }
+      }).then(response => {
         console.log(response.data);
       }).catch(error => {
         console.log(error);
@@ -198,8 +204,7 @@ export default {
 
       console.log(product);
     }
-
-
+    
   },
   mounted() {
     console.log('Component mounted.')

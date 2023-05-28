@@ -1,15 +1,19 @@
-from typing import Any, Dict
 from django.views import generic
-from django.shortcuts import get_object_or_404
-from django.db.models import Q
-import datetime
-# from django.views.generic import ListView
+from django.shortcuts import get_object_or_404, render
+from django.views.decorators.csrf import csrf_exempt
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 from product.models import Variant, Product, ProductVariant, ProductVariantPrice
 
-
-class CreateProductView(generic.TemplateView):
+class CreateProductView(generic.CreateView):
     template_name = 'products/create.html'
+    model = Product
+    fields = "__all__"
+
+    def get_queryset(self):
+        return super().get_queryset()
 
     def get_context_data(self, **kwargs):
         context = super(CreateProductView, self).get_context_data(**kwargs)
@@ -17,6 +21,30 @@ class CreateProductView(generic.TemplateView):
         context['product'] = True
         context['variants'] = list(variants.all())
         return context
+
+# @csrf_exempt    
+@api_view(['POST'])
+def create_product_apiview(request):
+    message = "Got some data!"
+    product_title = request.data.get('title')
+    product_sku = request.data.get('sku')
+    product_description = request.data.get('description')
+    product_image = request.data.get('product_image')
+    product_variant = request.data.get('product_variant')
+    product_variant_prices = request.data.get('product_variant_prices')
+    if product_title:
+        product_obj = Product.objects.create(title=product_title, sku=product_sku, description=product_description)
+        # if product_variant:
+        #     product_variant_obj = ProductVariant.objects.create(variant_title=product_variant_prices) 
+        print(product_obj)
+    else:
+        message = "Error: Product title is required"
+    print('product_image: ', product_image)
+    print('product_variant: ', product_variant)
+    print('product_variant_prices: ', product_variant_prices)
+    return Response({"message": message, "data": request.data})
+    # return render_to_response(context_instance=RequestContext(request))
+
     
 
 class ProductListView(generic.ListView):
@@ -67,7 +95,7 @@ class ProductListView(generic.ListView):
                         object_list.append(item)
             return object_list            
 
-    def get_context_data(self, **kwargs: Any):
+    def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         variants = Variant.objects.filter(active=True)
         context['variants'] = list(variants)
