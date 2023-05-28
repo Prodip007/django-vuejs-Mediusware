@@ -5,7 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from product.models import Variant, Product, ProductVariant, ProductVariantPrice
+from product.models import Variant, Product, ProductVariant, ProductVariantPrice, ProductImage
 
 class CreateProductView(generic.CreateView):
     template_name = 'products/create.html'
@@ -22,7 +22,7 @@ class CreateProductView(generic.CreateView):
         context['variants'] = list(variants.all())
         return context
 
-# @csrf_exempt    
+
 @api_view(['POST'])
 def create_product_apiview(request):
     message = "Got some data!"
@@ -30,21 +30,63 @@ def create_product_apiview(request):
     product_sku = request.data.get('sku')
     product_description = request.data.get('description')
     product_image = request.data.get('product_image')
+    print(product_image)
     product_variant = request.data.get('product_variant')
     product_variant_prices = request.data.get('product_variant_prices')
+    if product_variant:
+        all_variants = []
+        for item in product_variant:
+            variant_id = item.get('option')
+            varient_tags = item.get('tags')
+            s_variant = get_object_or_404(Variant, id=variant_id)
+            s_all_variants = []
+            for tag in varient_tags:
+                varient_product_obj = {
+                    'variant_title': tag,
+                    'variant': s_variant,
+                    'product': 'product_name'
+                }
+                s_all_variants.append(varient_product_obj)
+            all_variants.append(s_all_variants)
+    
     if product_title:
         product_obj = Product.objects.create(title=product_title, sku=product_sku, description=product_description)
-        # if product_variant:
-        #     product_variant_obj = ProductVariant.objects.create(variant_title=product_variant_prices) 
-        print(product_obj)
+        if product_variant:
+            all_variants = []
+            for item in product_variant:
+                variant_id = item.get('option')
+                varient_tags = item.get('tags')
+                s_variant = get_object_or_404(Variant, id=variant_id)
+                s_all_variants = []
+                for tag in varient_tags:
+                    varient_product_obj = ProductVariant.objects.create(variant_title=tag, variant=s_variant, product=product_obj)
+                    s_all_variants.append(varient_product_obj)
+                all_variants.append(s_all_variants)
+            product_variant_combinations = []
+            if len(all_variants)>1:
+                product_variant_one_list = all_variants[0]
+                product_variant_two_list = all_variants[1]
+                product_variant_three_list = all_variants[2]
+                for x in product_variant_one_list:
+                    for y in product_variant_two_list:
+                        for z in product_variant_three_list:
+                            product_variant_combinations.append((x,y,z))
+        if product_variant_prices:
+            n = 0
+            for item in product_variant_prices:
+                print(item)
+                variant_price = item.get('price')
+                variant_stock = item.get('stock')
+                s_product_variant_one = product_variant_combinations[n][0]
+                s_product_variant_two = product_variant_combinations[n][1]
+                s_product_variant_three = product_variant_combinations[n][2]
+                n = n+1
+                product_variant_price = ProductVariantPrice.objects.create(product_variant_one=s_product_variant_one, product_variant_two=s_product_variant_two, product_variant_three=s_product_variant_three, price=variant_price, stock=variant_stock, product=product_obj)
+        if product_image:
+            product_image_obj = ProductImage.objects.create(product=product_obj, file_path=product_image)
     else:
         message = "Error: Product title is required"
-    print('product_image: ', product_image)
-    print('product_variant: ', product_variant)
-    print('product_variant_prices: ', product_variant_prices)
     return Response({"message": message, "data": request.data})
-    # return render_to_response(context_instance=RequestContext(request))
-
     
 
 class ProductListView(generic.ListView):
