@@ -1,6 +1,8 @@
 from typing import Any, Dict
 from django.views import generic
-from django.views.generic import ListView
+from django.shortcuts import get_object_or_404
+from django.db.models import Q
+# from django.views.generic import ListView
 
 from product.models import Variant, Product, ProductVariant, ProductVariantPrice
 
@@ -16,28 +18,41 @@ class CreateProductView(generic.TemplateView):
         return context
     
 
-class ProductListView(ListView):
+class ProductListView(generic.ListView):
     model = Product
     template_name = 'products/list.html'
     paginate_by = 2
 
+
     def get_queryset(self, *args, **kwargs):
-        if self.request.GET:
+        if self.request.GET == {} or self.request.GET.get('page'):
+            return super().get_queryset()
+        else:
             product_name = self.request.GET.get('title', None)
             product_variant = self.request.GET.get('variant', None)
+            price_from = self.request.GET.get('price_from',None)
+            price_to = self.request.GET.get('price_to')
             object_list = []
 
             if product_name:
                 object_list = Product.objects.filter(title=product_name)
-                for obj in object_list:
-                    print(obj.productvariant_set.all())
             elif product_variant:
                 object_list = Product.objects.filter(productvariant=product_variant)
-            return object_list
-        
-
-        else:
-            return super().get_queryset()
+            elif price_from or price_to:
+                productvariantprice_list = []
+                if price_from:
+                    s_productvariantprice_list = ProductVariantPrice.objects.filter(price__gt=price_from)
+                    for item in s_productvariantprice_list:
+                        productvariantprice_list.append(item)
+                if price_to:
+                    s_productvariantprice_list = ProductVariantPrice.objects.filter(price__lt=price_to)
+                    for item in s_productvariantprice_list:
+                        productvariantprice_list.append(item)
+                for item in productvariantprice_list:
+                    s_obj = get_object_or_404(Product, productvariantprice=item)
+                    if s_obj not in object_list:
+                        object_list.append(s_obj)
+            return object_list            
 
     def get_context_data(self, **kwargs: Any):
         context = super().get_context_data(**kwargs)
